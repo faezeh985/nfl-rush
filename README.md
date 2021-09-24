@@ -54,4 +54,8 @@ We will evaluate you on your ability to solve the problem defined in the require
 If you have any questions regarding requirements, do not hesitate to email your contact at theScore for clarification.
 
 ### Installation and running this solution
-... TODO
+For running the project you have two options:
+ 1. Using Docker: Run `docker build -t nfl-rus:latest .` and then `docker run -d -p 5000:5000 nfl-rush`. 
+ 2. Run it directly: First install the python requirements by running `pip3 install -r requirements.txt` and for running the app run this command `python3 main.py`.
+
+After initiating the app with one of these methods; you can access the nfl rush web page using this link `http://127.0.0.1:5000/`

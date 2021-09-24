@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Players</title>
+    <link rel="shortcut icon" type="image/jpg" href="/static/fave.png"/>
+</head>
+<body>
+<h1 style="color:t#091a57; text-align:center;"> THE RUSH </h1>
+<div class="container">
+    <div style="float:left;">
+        Sort By: <select id="sort_by" onchange="reloadTable()">
+        <option value="">--</option>
+        <option value="Yds">Total Rushing Yard</option>
+        <option value="Lng">Longest Rush</option>
+        <option value="TD">Total Rushing Touchdowns</option>
+    </select>
+    </div>
+    <div style="float:right;">
+        Player's name: <input id="name-filter" type="text">
+        <input type="button" onclick="reloadTable()" value="Search">
+    </div>
+</div>
+<br><br>
+<div>
+    <table id="my-table" class="table">
+        <thead>
+        <th>Name</th>
+        <th>Team</th>
+        <th>Position</th>
+        <th>Rushing Attempts Per Game Average</th>
+        <th>Rushing Attempts</th>
+        <th>Total Rushing Yard</th>
+        <th>Rushing Average Yards Per Attempt</th>
+        <th>Rushing Yards Per Gam</th>
+        <th>Total Rushing Touchdowns</th>
+        <th>Longest Rush</th>
+        <th>Rushing First Down</th>
+        <th>Rushing First Down Percentage</th>
+        <th>Rushing 20+ Yards Each</th>
+        <th>Rushing 40+ Yards Each</th>
+        <th>Rushing Fumble</th>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<br>
+<div id="pagination" class="container">
+</div>
+<div class="container"><a href="/players/download"><h4>Download data CSV file</h4></a></div>
+<script>
+window.onload = function(){
+    const data = {{players|safe}};
+    const pages = {{pages}}
+    $("#my-table tbody").empty();
+    $("#pagination").empty();
+    tableBuilder(data, pages, 1);
+}
+function reloadTable(page){
+    const sortBy = $("#sort_by").val();
+    const filterBy = $("#name-filter").val() || '';
+    page = page || 1;
+    $.getJSON({
+    url : "/players/condition?sortBy=" + sortBy + "&filterBy=" + filterBy +"&page=" + page,
+    success: function(data){
+        $("#my-table tbody").empty();
+        $("#pagination").empty();
+        tableBuilder(data.players, data.pages, page);
+    },
+    error : function(data){
+        alert("Something Went Wrong!!");
+    }
+});
+}
+function tableBuilder(players, pages, current_page){
+    const columns = ['Player', 'Team', 'Pos', 'Att/G', 'Att', 'Yds', 'Avg', 'Yds/G', 'TD', 'Lng', '1st', '1st%', '20+', '40+', 'FUM'];
+    for (p of players) {
+        const row = document.createElement('TR');
+        for (column of columns){
+            const cell = document.createElement('TD');
+            const text = document.createTextNode(p[column]);
+            cell.appendChild(text);
+            row.appendChild(cell);
+        }
+        $("#my-table tbody").append(row);
+    }
+    let startPage = 1
+    const maxPagination = 25
+    const pagePad = 5
+    const bigData = pages > maxPagination
+    if (bigData){
+        startPage = Math.max(current_page-pagePad,1)
+    }
+     for (let page=startPage; page< pages+1; page++){
+        if (bigData){
+            if(page > (current_page + pagePad) && page < (pages - pagePad)){
+            $("#pagination").append(".");
+            continue;
+            }
+        }
+        const button = document.createElement('input');
+        button.type = "button";
+        button.onclick = function(){ reloadTable(page);}
+        button.value = page;
+        if (page == current_page){
+            button.style = "background-color:#bbc6ed;";
+        }
+        $("#pagination").append(button);
+        $("#pagination").append("  ");
+     }
+}
+
+</script>
+<style>
+    h4, a{
+    float:center
+    }
+    .container{
+    width:97%;
+    margin-left: auto;
+    margin-right: auto;
+
+    }
+
+    table, th, td {
+      border: 1px solid black;
+    }
+    table {
+        width: 97%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    th, td{
+      text-align: center;
+      height: 30px
+    }
+    tr:nth-child(even) {
+        background-color: #bbc6ed;
+    }
+    th {
+    background-color: #3257db;
+    color: white;
+    }
+
+</style>
+</body>
+</html>
